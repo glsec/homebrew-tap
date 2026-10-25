@@ -1,0 +1,68 @@
+name: Update formula
+
+# Moves the formula to the latest glsec release once a day, or right away when
+# run by hand after a release. The archives are checked against their
+# provenance attestation before the formula changes, and the new formula is
+# installed and tested before it is committed.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (default the latest release)
+        required: false
+
+permissions: {}
+
+concurrency:
+  group: update-formula
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: Update
+    runs-on: macos-latest
+    permissions:
+      contents: write # commit the new formula
+      attestations: read # verify the release archives
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Write the formula
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: scripts/update.sh "$TAG"
+
+      - name: Check for a change
+        id: diff
+        run: |
+          if [ -z "$(git status --porcelain Formula)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install and test
+        if: steps.diff.outputs.changed == 'true'
+        run: scripts/test.sh
+
+      # Through the contents API, so the commit is signed by GitHub and no git
+      # credentials are kept in the checkout.
+      - name: Commit
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version=$(sed -n 's/^  version "\(.*\)"$/\1/p' Formula/glsec.rb)
+          args=(-f message="glsec $version" -f content="$(base64 < Formula/glsec.rb | tr -d '\n')")
+          if sha=$(gh api "repos/$REPO/contents/Formula/glsec.rb" --jq .sha 2>/dev/null); then
+            args+=(-f sha="$sha")
+          fi
+          gh api -X PUT "repos/$REPO/contents/Formula/glsec.rb" "${args[@]}" --jq .commit.html_url
