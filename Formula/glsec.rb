@@ -3,28 +3,28 @@
 class Glsec < Formula
   desc "Security linter for GitLab CI/CD pipelines"
   homepage "https://glsec.github.io"
-  version "1.25.0"
+  version "1.26.0"
   license "Apache-2.0"
 
   on_macos do
     on_arm do
       url "https://github.com/glsec/glsec/releases/download/v#{version}/glsec_#{version}_darwin_arm64.tar.gz"
-      sha256 "f6a73b9917445e16d1c5a8e8d8682718984df1bf3aa6e80aaf587e2a743b6773"
+      sha256 "c2a65b30570c51a491797f4139c8f47a4e064eda91c6cf2f813927b56f565d39"
     end
     on_intel do
       url "https://github.com/glsec/glsec/releases/download/v#{version}/glsec_#{version}_darwin_amd64.tar.gz"
-      sha256 "be16c64d0500bbfdf1cba4c04e4465cbac808bc1b45c7cda9389a42f31bb12a2"
+      sha256 "5557bd3233906024710049ce6108c598901c9a0463cd4b0e08ad4b5c3d41843a"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/glsec/glsec/releases/download/v#{version}/glsec_#{version}_linux_arm64.tar.gz"
-      sha256 "a9378052b6c14d8c7d2b6c950daa8b0ff1d4c60bf6b1097f1ad571461bc77b83"
+      sha256 "a9b2acea7379a7deb6228cc6e9f26249342f816863bb1c236f7027f9293eee6f"
     end
     on_intel do
       url "https://github.com/glsec/glsec/releases/download/v#{version}/glsec_#{version}_linux_amd64.tar.gz"
-      sha256 "36b9565e6e3c79b52a3ce2d447cb18550535034ecba1e4526afd870d091140ae"
+      sha256 "1ce80a53a546aeff18dc90360c72d890eb15dcf80bb368e288b08698be680c5d"
     end
   end
 
