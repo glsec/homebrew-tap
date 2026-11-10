@@ -1,0 +1,26 @@
+name: Security (zizmor)
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install zizmor
+        # Version and hash pinned in .github/requirements/zizmor.txt.
+        run: pip install --require-hashes --no-deps -r .github/requirements/zizmor.txt
+      - name: Run zizmor
+        run: zizmor --gh-token "${{ secrets.GITHUB_TOKEN }}" .github/workflows/
